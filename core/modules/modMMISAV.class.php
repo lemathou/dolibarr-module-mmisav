@@ -2,7 +2,7 @@
 /* Copyright (C) 2004-2018  Laurent Destailleur     <eldy@users.sourceforge.net>
  * Copyright (C) 2018-2019  Nicolas ZABOURI         <info@inovea-conseil.com>
  * Copyright (C) 2019-2020  Frédéric France         <frederic.france@netlogic.fr>
- * Copyright (C) 2024 MOULIN Mathieu <webmaster@sfy-gestion.com>
+ * Copyright (C) 2024       Mathieu MOULIN          <mathieu@iprospective.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -52,7 +52,7 @@ class modMMISAV extends DolibarrModules
 
 		// Family can be 'base' (core modules),'crm','financial','hr','projects','products','ecm','technic' (transverse modules),'interface' (link with external tools),'other','...'
 		// It is used to group modules by family in module setup page
-		$this->family = "other";
+		$this->family = "crm";
 
 		// Module position in the family on 2 digits ('01', '10', '20', ...)
 		$this->module_position = '90';
@@ -83,12 +83,12 @@ class modMMISAV extends DolibarrModules
 		// If file is in theme/yourtheme/img directory under name object_pictovalue.png, use this->picto='pictovalue'
 		// If file is in module/img directory under name object_pictovalue.png, use this->picto='pictovalue@module'
 		// To use a supported fa-xxx css style of font awesome, use this->picto='xxx'
-		$this->picto = 'fa-file-o';
+		$this->picto = 'mmilogo@mmisav';
 
 		// Define some features supported by module (triggers, login, substitutions, menus, css, etc...)
 		$this->module_parts = array(
 			// Set this to 1 if module has its own trigger directory (core/triggers)
-			'triggers' => 0,
+			'triggers' => 1,
 			// Set this to 1 if module has its own login method file (core/login)
 			'login' => 0,
 			// Set this to 1 if module has its own substitution function file (core/substitutions)
@@ -136,7 +136,7 @@ class modMMISAV extends DolibarrModules
 		// A condition to hide module
 		$this->hidden = false;
 		// List of module class names that must be enabled if this module is enabled. Example: array('always'=>array('modModuleToEnable1','modModuleToEnable2'), 'FR'=>array('modModuleToEnableFR')...)
-		$this->depends = array();
+		$this->depends = array('modMMICommon', 'modTicket');
 		// List of module class names to disable if this one is disabled. Example: array('modModuleToDisable1', ...)
 		$this->requiredby = array();
 		// List of module class names this module is in conflict with. Example: array('modModuleToDisable1', ...)
@@ -300,6 +300,7 @@ class modMMISAV extends DolibarrModules
 		$r = 0;
 		// Add here entries to declare new menus
 		/* BEGIN MODULEBUILDER TOPMENU */
+		/*
 		$this->menu[$r++] = array(
 			'fk_menu'=>'', // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
 			'type'=>'top', // This is a Top menu entry
@@ -315,6 +316,7 @@ class modMMISAV extends DolibarrModules
 			'target'=>'',
 			'user'=>2, // 0=Menu for internal users, 1=external users, 2=both
 		);
+		*/
 		/* END MODULEBUILDER TOPMENU */
 		/* BEGIN MODULEBUILDER LEFTMENU MYOBJECT */
 		/*$this->menu[$r++]=array(
@@ -448,13 +450,13 @@ class modMMISAV extends DolibarrModules
 		}
 
 		// Create extrafields during init
-		//include_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
-		//$extrafields = new ExtraFields($this->db);
-		//$result1=$extrafields->addExtraField('mmisav_myattr1', "New Attr 1 label", 'boolean', 1,  3, 'thirdparty',   0, 0, '', '', 1, '', 0, 0, '', '', 'mmisav@mmisav', 'isModEnabled("mmisav")');
-		//$result2=$extrafields->addExtraField('mmisav_myattr2', "New Attr 2 label", 'varchar', 1, 10, 'project',      0, 0, '', '', 1, '', 0, 0, '', '', 'mmisav@mmisav', 'isModEnabled("mmisav")');
-		//$result3=$extrafields->addExtraField('mmisav_myattr3', "New Attr 3 label", 'varchar', 1, 10, 'bank_account', 0, 0, '', '', 1, '', 0, 0, '', '', 'mmisav@mmisav', 'isModEnabled("mmisav")');
-		//$result4=$extrafields->addExtraField('mmisav_myattr4', "New Attr 4 label", 'select',  1,  3, 'thirdparty',   0, 1, '', array('options'=>array('code1'=>'Val1','code2'=>'Val2','code3'=>'Val3')), 1,'', 0, 0, '', '', 'mmisav@mmisav', 'isModEnabled("mmisav")');
-		//$result5=$extrafields->addExtraField('mmisav_myattr5', "New Attr 5 label", 'text',    1, 10, 'user',         0, 0, '', '', 1, '', 0, 0, '', '', 'mmisav@mmisav', 'isModEnabled("mmisav")');
+		include_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
+		$extrafields = new ExtraFields($this->db);
+
+		// Commande associée en litige
+		$extrafields->addExtraField('fk_commande', $langs->trans('Extrafield_fk_commande'), 'link', 100, '', 'ticket', 0, 0, '', array('options'=>array('Commande:commande/class/commande.class.php'=>null)), 1, '', -1, $langs->trans('ExtrafieldToolTip_fk_commande'), '', $conf->entity, 'mmisav@mmisav', '$conf->mmisav->enabled');
+		// Fournisseur du produit en litige
+		$extrafields->addExtraField('fk_fourn', $langs->trans('Extrafield_fk_fourn'), 'sellist', 100, '', 'ticket',  0, 0, '', "a:1:{s:7:\"options\";a:1:{s:32:\"societe:nom:rowid::fournisseur=1\";N;}}", 1, '', -1, $langs->trans('ExtrafieldToolTip_fk_fourn'), '', $conf->entity, 'mmisav@mmisav', '$conf->mmisav->enabled');		
 
 		// Permissions
 		$this->remove($options);
