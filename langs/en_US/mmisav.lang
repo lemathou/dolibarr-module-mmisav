@@ -26,7 +26,6 @@ ModuleMMISAVDesc = Gestion du SAV par tickets avec communication fournisseur/cli
 # Admin page
 #
 MMISAVSetup = MMISAV setup
-Settings = Settings
 MMISAVSetupPage = MMISAV setup page
 MMISAV_MYPARAM1 = My param 1
 MMISAV_MYPARAM1Tooltip = My param 1 tooltip
@@ -37,7 +36,6 @@ MMISAV_MYPARAM2Tooltip=My param 2 tooltip
 #
 # About page
 #
-About = About
 MMISAVAbout = About MMISAV
 MMISAVAboutPage = MMISAV about page
 
